@@ -1,0 +1,26 @@
+[Unit]
+Description=Docker Gitlab Container
+Wants=docker.service
+Requires=docker-gitlab-postgresql.service docker-gitlab-redis.service
+After=network.target docker.service docker-nginx.service docker-gitlab-postgresql.service docker-gitlab-redis.service
+
+[Service]
+ExecStart=/usr/bin/docker run \
+            --name "${container}" \
+            -e "VIRTUAL_HOST=${hostname}" \
+            -e "CERT_NAME=${ssl_cert}" \
+            -e "GITLAB_SSH_PORT=${ssh_port}" \
+            -p "${ssh_port}:22" \
+            --volumes-from "${data_container}" \
+            --volumes-from "${log_container}" \
+            --link "${postgresql_container}:postgresql" \
+            --link "${redis_container}:redisio" \
+            "${image}"
+
+ExecStop=/usr/bin/docker stop "${container}"; /usr/bin/docker rm -f "${container}"
+EnvironmentFile=/etc/sysconfig/docker-gitlab
+Restart=on-failure
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target

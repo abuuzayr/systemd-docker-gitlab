@@ -1,0 +1,3 @@
+container = 'gitlab-redis'
+image = 'redis:3.0'
+data_container = 'gitlab-redis-data'

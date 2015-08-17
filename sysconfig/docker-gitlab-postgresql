@@ -1,0 +1,6 @@
+container = 'gitlab-postgresql'
+image = 'postgres:9.4'
+db = 'gitlab'
+username = 'gitlab'
+password = 'q97uHKwqaCVx6nwqFVzMsUIRcl8EEY54'
+data_container = 'gitlab-postgresql-data'

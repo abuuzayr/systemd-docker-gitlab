@@ -1,0 +1,18 @@
+[Unit]
+Description=Docker Gitlab Redis Container
+Wants=docker.service
+After=network.service docker.service
+
+[Service]
+ExecStart=/usr/bin/docker run \
+            --name "${container}" \
+            --volumes-from "${data_container}" \
+            "${image}"
+
+ExecStop=/usr/bin/docker stop "${container}"; /usr/bin/docker rm -f "${container}"
+EnvironmentFile=/etc/sysconfig/docker-gitlab-redis
+Restart=on-failure
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
