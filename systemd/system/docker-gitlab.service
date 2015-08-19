@@ -9,6 +9,7 @@ ExecStart=/usr/bin/docker run \
             --name "${container}" \
             -e "VIRTUAL_HOST=${hostname}" \
             -e "CERT_NAME=${ssl_cert}" \
+            -e "GITLAB_HOST=${hostname}" \
             -e "GITLAB_SSH_PORT=${ssh_port}" \
             -p "${ssh_port}:22" \
             --volumes-from "${data_container}" \
