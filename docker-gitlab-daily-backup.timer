@@ -1,0 +1,10 @@
+[Unit]
+Description=Docker Gitlab Daily Backup
+
+[Timer]
+OnCalendar=*-*-* 02:00:00
+Persistent=true
+Unit=docker-gitlab-backup.service
+
+[Install]
+WantedBy=timers.target

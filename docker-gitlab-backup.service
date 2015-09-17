@@ -1,0 +1,19 @@
+[Unit]
+Description=Docker Gitlab Backup Service
+Requires=\
+  docker.service \
+  docker-gitlab-postgresql.service \
+  docker-gitlab-redis.service
+After=\
+  docker.service \
+  docker-gitlab-postgresql.service \
+  docker-gitlab-redis.service \
+  network.target
+
+[Service]
+Type=oneshot
+
+# This script will stop gitlab and restart it if it was started before this
+# script was run.
+ExecStart=/usr/bin/bash /usr/local/bin/docker-gitlab-backup.sh
+EnvironmentFile=/etc/docker-gitlab.pod.conf

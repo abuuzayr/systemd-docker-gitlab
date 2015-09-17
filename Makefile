@@ -1,14 +1,29 @@
-service_files = docker-gitlab.service docker-gitlab-postgresql.service docker-gitlab-redis.service
-config_files = docker-gitlab.pod.conf
+service_files := $(wildcard *.service *.timer)
+config_files := $(wildcard *.pod.conf)
+script_files := $(wildcard *.sh)
 
-install:
-	install -Zvm 0644 -t /etc/systemd/system $(service_files) && \
-	systemctl daemon-reload && \
-	install -Zvbm 0600 -t /etc $(config_files)
+install: install-config install-scripts install-service
+uninstall: uninstall-config uninstall-scripts uninstall-service
 
-uninstall:
-	cd /etc/systemd/system && \
-	rm -vf $(service_files) \
-	systemctl daemon-reload && \
+install-config: $(config_files)
+	install -Zbm 0600 -t /etc $^
+
+install-scripts: $(script_files)
+	install -Zm 0644 -t /usr/local/bin $^
+
+install-service: $(service_files)
+	install -Zm 0644 -t /etc/systemd/system $^ && \
+	systemctl daemon-reload
+
+uninstall-config: $(config_files)
 	cd /etc && \
-	rm -vf $(config_files)
+	rm -f $^
+
+uninstall-scripts: $(script_files)
+	cd /usr/local/bin && \
+	rm -f $^
+
+uninstall-service: $(service_files)
+	cd /etc/systemd/system && \
+	rm -f $^ \
+	systemctl daemon-reload
