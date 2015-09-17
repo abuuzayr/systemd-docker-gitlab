@@ -20,20 +20,21 @@ ExecStartPre=/usr/bin/docker pull "${image}"
 
 ExecStart=\
   /usr/bin/docker run \
-  --name          "${container}" \
-  -e              "VIRTUAL_HOST=${host}" \
-  -e              "CERT_NAME=${cert}" \
-  -e              "GITLAB_HOST=${host}" \
-  -e              "GITLAB_SSH_PORT=${ssh_port}" \
-  -e              "NGINX_X_FORWARDED_PROTO=${nginx_x_forwarded_proto}" \
-  -p              "${ssh_port}:22" \
-  -c              "${cpu_share}" \
-  -m              "${memory}" \
-  --memory-swap   "${memory_swap}" \
-  --volumes-from  "${persistence_container}" \
-  --link          "${postgresql_container}:postgresql" \
-  --link          "${redis_container}:redisio" \
-  "${image}"
+    --name          "${container}" \
+    -e              "VIRTUAL_HOST=${host}" \
+    -e              "CERT_NAME=${cert}" \
+    -e              "GITLAB_HOST=${host}" \
+    -e              "GITLAB_SSH_PORT=${ssh_port}" \
+    -e              "GITLAB_BACKUP_EXPIRY=600" \
+    -e              "NGINX_X_FORWARDED_PROTO=${nginx_x_forwarded_proto}" \
+    -p              "${ssh_port}:22" \
+    -c              "${cpu_share}" \
+    -m              "${memory}" \
+    --memory-swap   "${memory_swap}" \
+    --volumes-from  "${persistence_container}" \
+    --link          "${postgresql_container}:postgresql" \
+    --link          "${redis_container}:redisio" \
+    "${image}"
 
 EnvironmentFile=/etc/docker-gitlab.pod.conf
 TimeoutStartSec=0
