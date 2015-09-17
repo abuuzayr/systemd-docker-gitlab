@@ -1,10 +1,10 @@
 [Unit]
 Description=Docker Gitlab Postgresql Container
-Wants=\
+Requires=\
   docker.service
 After=\
-  network.service \
-  docker.service
+  docker.service \
+  network.target
 
 [Service]
 ExecStartPre=-/usr/bin/docker stop "${postgresql_container}"

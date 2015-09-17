@@ -1,10 +1,10 @@
 [Unit]
 Description=Docker Gitlab Redis Container
-Wants=\
+Requires=\
   docker.service
 After=\
-  network.service \
-  docker.service
+  docker.service \
+  network.target
 
 [Service]
 ExecStartPre=-/usr/bin/docker stop "${redis_container}"
@@ -12,12 +12,12 @@ ExecStartPre=-/usr/bin/docker rm "${redis_container}"
 ExecStartPre=/usr/bin/docker pull "${redis_image}"
 ExecStart=\
   /usr/bin/docker run \
-  --name          "${redis_container}" \
-  -c              "${redis_cpu_share}" \
-  -m              "${redis_memory}" \
-  --memory-swap   "${redis_memory_swap}" \
-  --volumes-from  "${redis_persistence_container}" \
-  "${redis_image}"
+    --name          "${redis_container}" \
+    -c              "${redis_cpu_share}" \
+    -m              "${redis_memory}" \
+    --memory-swap   "${redis_memory_swap}" \
+    --volumes-from  "${redis_persistence_container}" \
+    "${redis_image}"
 
 EnvironmentFile=/etc/docker-gitlab.pod.conf
 TimeoutStartSec=0
