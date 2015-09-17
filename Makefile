@@ -2,9 +2,9 @@ service_files = docker-gitlab.service docker-gitlab-postgresql.service docker-gi
 config_files = docker-gitlab.pod.conf
 
 install:
-	install -Zm 0644 -t /etc/systemd/system $(service_files) && \
+	install -Zvm 0644 -t /etc/systemd/system $(service_files) && \
 	systemctl daemon-reload && \
-	install -Zbm 0600 -t /etc $(config_files)
+	install -Zvbm 0600 -t /etc $(config_files)
 
 uninstall:
 	cd /etc/systemd/system && \
