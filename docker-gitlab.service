@@ -1,0 +1,44 @@
+[Unit]
+Description=Docker Gitlab Container
+Wants=\
+  docker.service
+Requires=\
+  docker-gitlab-postgresql.service \
+  docker-gitlab-redis.service
+After=\
+  docker.service \
+  docker-gitlab-postgresql.service \
+  docker-gitlab-redis.service \
+  docker-nginx.service \
+  docker-nginx-gen.service \
+  network.target
+
+[Service]
+ExecStartPre=-/usr/bin/docker stop "${container}"
+ExecStartPre=-/usr/bin/docker rm "${container}"
+ExecStartPre=/usr/bin/docker pull "${image}"
+
+ExecStart=\
+  /usr/bin/docker run \
+  --name          "${container}" \
+  -e              "VIRTUAL_HOST=${host}" \
+  -e              "CERT_NAME=${cert}" \
+  -e              "GITLAB_HOST=${host}" \
+  -e              "GITLAB_SSH_PORT=${ssh_port}" \
+  -e              "NGINX_X_FORWARDED_PROTO=${nginx_x_forwarded_proto}" \
+  -p              "${ssh_port}:22" \
+  -c              "${cpu_share}" \
+  -m              "${memory}" \
+  --memory-swap   "${memory_swap}" \
+  --volumes-from  "${persistence_container}" \
+  --link          "${postgresql_container}:postgresql" \
+  --link          "${redis_container}:redisio" \
+  "${image}"
+
+EnvironmentFile=/etc/docker-gitlab.pod.conf
+TimeoutStartSec=0
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target

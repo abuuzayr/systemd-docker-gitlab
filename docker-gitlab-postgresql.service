@@ -1,0 +1,33 @@
+[Unit]
+Description=Docker Gitlab Postgresql Container
+Wants=\
+  docker.service
+After=\
+  network.service \
+  docker.service
+
+[Service]
+ExecStartPre=-/usr/bin/docker stop "${postgresql_container}"
+ExecStartPre=-/usr/bin/docker rm "${postgresql_container}"
+ExecStartPre=/usr/bin/docker pull "${postgresql_image}"
+ExecStart=\
+  /usr/bin/docker run \
+  --name          "${postgresql_container}" \
+  -e              "POSTGRES_USER=${postgresql_user}" \
+  -e              "POSTGRES_PASSWORD=${postgresql_password}" \
+  -e              "DB_NAME=${postgresql_db}" \
+  -e              "DB_USER=${postgresql_user}" \
+  -e              "DB_PASS=${postgresql_password}" \
+  -c              "${postgresql_cpu_share}" \
+  -m              "${postgresql_memory}" \
+  --memory-swap   "${postgresql_memory_swap}" \
+  --volumes-from  "${postgresql_persistence_container}" \
+  "${postgresql_image}"
+
+EnvironmentFile=/etc/docker-gitlab.pod.conf
+TimeoutStartSec=0
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
