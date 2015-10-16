@@ -1,8 +1,7 @@
 [Unit]
 Description=Docker Gitlab Container
-Wants=\
-  docker.service
 Requires=\
+  docker.service
   docker-gitlab-postgresql.service \
   docker-gitlab-redis.service
 After=\
