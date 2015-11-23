@@ -13,7 +13,7 @@ ExecStartPre=/usr/bin/docker pull "${redis_image}"
 ExecStart=\
   /usr/bin/docker run \
     --name          "${redis_container}" \
-    -c              "${redis_cpu_share}" \
+    --cpu-shares    "${redis_cpu_share}" \
     -m              "${redis_memory}" \
     --memory-swap   "${redis_memory_swap}" \
     --volumes-from  "${redis_persistence_container}" \

@@ -18,7 +18,7 @@ ExecStart=\
     -e              "DB_NAME=${postgresql_db}" \
     -e              "DB_USER=${postgresql_user}" \
     -e              "DB_PASS=${postgresql_password}" \
-    -c              "${postgresql_cpu_share}" \
+    --cpu-shares    "${postgresql_cpu_share}" \
     -m              "${postgresql_memory}" \
     --memory-swap   "${postgresql_memory_swap}" \
     --volumes-from  "${postgresql_persistence_container}" \

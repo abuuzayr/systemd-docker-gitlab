@@ -27,7 +27,7 @@ ExecStart=\
     -e              "GITLAB_BACKUP_EXPIRY=600" \
     -e              "NGINX_X_FORWARDED_PROTO=${nginx_x_forwarded_proto}" \
     -p              "${ssh_port}:22" \
-    -c              "${cpu_share}" \
+    --cpu-shares    "${cpu_share}" \
     -m              "${memory}" \
     --memory-swap   "${memory_swap}" \
     --volumes-from  "${persistence_container}" \

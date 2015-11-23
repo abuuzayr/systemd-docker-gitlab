@@ -44,7 +44,7 @@ set -e
 "$docker" run \
   --name "$container" \
   -e              "GITLAB_HOST=$host" \
-  -c              "$cpu_share" \
+  --cpu-shares    "$cpu_share" \
   -m              "$memory" \
   --memory-swap   "$memory_swap" \
   --volumes-from  "$persistence_container" \
