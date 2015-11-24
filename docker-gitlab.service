@@ -20,9 +20,11 @@ ExecStartPre=/usr/bin/docker pull "${image}"
 ExecStart=\
   /usr/bin/docker run \
     --name          "${container}" \
+    -v              "${host_dir}:/host:z" \
     -e              "VIRTUAL_HOST=${host}" \
     -e              "CERT_NAME=${cert}" \
     -e              "GITLAB_HOST=${host}" \
+    -e              "GITLAB_SECRETS_DB_KEY_BASE=${session_key}" \
     -e              "GITLAB_SSH_PORT=${ssh_port}" \
     -e              "GITLAB_BACKUP_EXPIRY=600" \
     -e              "NGINX_X_FORWARDED_PROTO=${nginx_x_forwarded_proto}" \
