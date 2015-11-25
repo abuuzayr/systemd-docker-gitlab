@@ -1,7 +1,7 @@
 set -e
 docker='/usr/bin/docker'
 systemctl='/usr/bin/systemctl'
-xz='/usr/bin/xz'
+gz='/usr/bin/gzip'
 mv='/usr/bin/mv'
 
 function errnoexe {
@@ -18,8 +18,8 @@ if [[ ! -x $systemctl ]]; then
   exit 1
 fi
 
-if [[ ! -x $xz ]]; then
-  errnoexe "$xz"
+if [[ ! -x $gz ]]; then
+  errnoexe "$gz"
   exit 1
 fi
 
@@ -71,8 +71,8 @@ if [[ "$gitlab_isactive" == 'active' ]]; then
   "$systemctl" start docker-gitlab
 fi
 
-"$xz" -v /docker-tmp/gitlab/*.tar
-"$mv" -v /docker-tmp/gitlab/*.tar.xz "$backup_dir"
+"$gz" -v /docker-tmp/gitlab/*.tar
+"$mv" -v /docker-tmp/gitlab/*.tar.gz "$backup_dir"
 
 lastret="$?"
 
