@@ -1,49 +1,53 @@
 set -e
-docker='/usr/bin/docker'
-systemctl='/usr/bin/systemctl'
-gz='/usr/bin/gzip'
-mv='/usr/bin/mv'
+set -x
 
-function errnoexe {
-  echo "$1 not found or not executable" >&2
+if [[ "$EUID" != 0 ]]; then
+  echo 'Please run this script as root.' >&2
+  exit 1
+fi
+
+if [[ ! -d /docker-wd ]]; then
+  echo '/docker-wd does not exist or is not a directory. Aborting...' >&2
+  exit 1
+fi
+
+function check {
+  if [[ -z "$(which "$1" 2>/dev/null)" ]]; then
+    "\"$1\""' does not exist in $PATH. Aborting...' >&2
+    exit 1
+  fi
 }
 
-if [[ ! -x $docker ]]; then
-  errnoexe "$docker"
+check docker
+
+docker > /dev/null 2>&1
+
+if [[ "$?" != 0 ]]; then
+  echo 'Does not have permissions to use docker. Aborting...' >&2
   exit 1
 fi
 
-if [[ ! -x $systemctl ]]; then
-  errnoexe "$systemctl"
-  exit 1
-fi
+check install
+check gzip
+check mv
+check systemctl
 
-if [[ ! -x $gz ]]; then
-  errnoexe "$gz"
-  exit 1
-fi
+gitlab_isactive="$(systemctl is-active docker-gitlab.service)"
 
-if [[ ! -x $mv ]]; then
-  errnoexe "$mv"
-  exit 1
-fi
-
-
-gitlab_isactive="$($systemctl is-active docker-gitlab.service)"
-
-if [[ "$gitlab_isactive" == 'active' ]]; then
-  "$systemctl" stop docker-gitlab
+if [[ 'active' == "$gitlab_isactive" ]]; then
+  systemctl stop docker-gitlab
 fi
 
 
 set +e
-"$docker" stop "$container"
-"$docker" rm "$container"
+docker stop "$container"
+docker rm "$container"
 set -e
 
-"$docker" run \
+docker run \
   --name "$container" \
   -e              "GITLAB_HOST=$host" \
+  -e              "GITLAB_SECRETS_DB_KEY_BASE=${secrets_db_key}" \
   --cpu-shares    "$cpu_share" \
   -m              "$memory" \
   --memory-swap   "$memory_swap" \
@@ -53,26 +57,25 @@ set -e
   "$image" app:rake gitlab:backup:create
 
 set +e
-"$docker" stop "$container"
-"$docker" rm "$container"
+docker stop "$container"
+docker rm "$container"
 set -e
 
-install -dvm 0700 /docker-tmp
-install -dvm 0700 /docker-tmp/gitlab
+install -dZvm 0700 /docker-wd/gitlab
 
-"$docker" run \
+docker run \
   --name "$container" \
   --volumes-from "$persistence_container" \
-  -v "/docker-tmp/gitlab:/backup" \
+  -v "/docker-wd/gitlab:/backup" \
   --entrypoint /bin/bash \
   "$image" -c 'mv -v /home/git/data/backups/* /backup'
 
 if [[ "$gitlab_isactive" == 'active' ]]; then
-  "$systemctl" start docker-gitlab
+  systemctl start docker-gitlab
 fi
 
-"$gz" -v /docker-tmp/gitlab/*.tar
-"$mv" -v /docker-tmp/gitlab/*.tar.gz "$backup_dir"
+gzip -v /docker-wd/gitlab/*.tar
+mv -v /docker-wd/gitlab/*.tar.gz "$backup_dir"
 
 lastret="$?"
 
