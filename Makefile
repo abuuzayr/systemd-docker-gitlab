@@ -24,6 +24,8 @@ uninstall-scripts: $(script_files)
 	rm -f $^
 
 uninstall-service: $(service_files)
+	systemctl stop $^ ; \
+	systemctl disable $^ ; \
 	cd /etc/systemd/system && \
-	rm -f $^ \
+	rm -f $^ && \
 	systemctl daemon-reload
