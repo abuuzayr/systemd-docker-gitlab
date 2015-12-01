@@ -13,7 +13,7 @@ ExecStartPre=/usr/bin/docker pull "${postgresql_image}"
 ExecStart=\
   /usr/bin/docker run \
     --name          "${postgresql_container}" \
-    -v              "${host_dir}/host:z" \
+    -v              "${host_dir}:/host:z" \
     -e              "POSTGRES_USER=${postgresql_user}" \
     -e              "POSTGRES_PASSWORD=${postgresql_password}" \
     -e              "DB_NAME=${postgresql_db}" \
