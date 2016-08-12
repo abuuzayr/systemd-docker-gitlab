@@ -16,7 +16,7 @@ After=\
 ExecStartPre=-/usr/bin/docker stop "${container}"
 ExecStartPre=-/usr/bin/docker rm "${container}"
 ExecStartPre=/usr/bin/docker pull "${image}"
-
+ExecStartPre=/bin/bash -c "/usr/bin/systemctl set-environment gitlab_trusted_proxies=$(docker inspect --format '{{ .NetworkSettings.IPAddress }}' ${nginx_container})"
 ExecStart=\
   /usr/bin/docker run \
     --name          "${container}" \
@@ -24,6 +24,7 @@ ExecStart=\
     -e              "VIRTUAL_HOST=${host}" \
     -e              "CERT_NAME=${cert}" \
     -e              "GITLAB_HOST=${host}" \
+    -e              "GITLAB_TRUSTED_PROXIES=${gitlab_trusted_proxies}" \
     -e              "GITLAB_SECRETS_DB_KEY_BASE=${secrets_db_key}" \
     -e              "GITLAB_SSH_PORT=${ssh_port}" \
     -e              "GITLAB_BACKUP_EXPIRY=600" \
@@ -44,3 +45,4 @@ RestartSec=10
 
 [Install]
 WantedBy=multi-user.target
+
