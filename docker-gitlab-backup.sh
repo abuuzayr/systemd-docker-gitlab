@@ -6,11 +6,6 @@ if [[ "$EUID" != 0 ]]; then
   exit 1
 fi
 
-if [[ ! -d /docker-wd ]]; then
-  echo '/docker-wd does not exist or is not a directory. Aborting...' >&2
-  exit 1
-fi
-
 function check {
   if [[ -z "$(which "$1" 2>/dev/null)" ]]; then
     "\"$1\""' does not exist in $PATH. Aborting...' >&2
@@ -44,6 +39,16 @@ docker stop "$container"
 docker rm "$container"
 set -e
 
+tmp_container="TMP_gitlab-aws"
+
+set +e
+docker create \
+    --name "$tmp_container" \
+    --entrypoint '/bin/true' \
+    --volume '/home/git/data/backups' \
+    busybox
+set -e
+
 docker run \
   --name "$container" \
   -e              "GITLAB_HOST=$host" \
@@ -52,6 +57,7 @@ docker run \
   -m              "$memory" \
   --memory-swap   "$memory_swap" \
   --volumes-from  "$persistence_container" \
+  --volumes-from  "$tmp_container" \
   --link          "${postgresql_container}:postgresql" \
   --link          "${redis_container}:redisio" \
   "$image" app:rake gitlab:backup:create
@@ -61,23 +67,30 @@ docker stop "$container"
 docker rm "$container"
 set -e
 
-install -dZvm 0700 /docker-wd/gitlab
+docker run -i --rm \
+    --name gitlab-aws \
+    --volumes-from "$tmp_container" \
+    --volumes-from gitlab-aws-credentials \
+    --entrypoint bash \
+    cgswong/aws -s <<END
+set -e
+ls /home/git/data/backups/*.tar | xargs -n1 gzip
+ls /home/git/data/backups | xargs -n1 -I% aws s3 cp \
+    --sse \
+    --storage-class STANDARD_IA \
+    '/home/git/data/backups/%' 's3://groventure-gitlab-backups/%'
+END
 
-docker run \
-  --name "$container" \
-  --volumes-from "$persistence_container" \
-  -v "/docker-wd/gitlab:/backup" \
-  --entrypoint /bin/bash \
-  "$image" -c 'mv -v /home/git/data/backups/* /backup'
+set +e
+docker rm "$tmp_container"
+docker rm gitlab-aws
+set -e
+
+lastret="$?"
 
 if [[ "$gitlab_isactive" == 'active' ]]; then
   systemctl start docker-gitlab
 fi
-
-gzip -v /docker-wd/gitlab/*.tar
-mv -v /docker-wd/gitlab/*.tar.gz "$backup_dir"
-
-lastret="$?"
 
 set +e
 exit "$?"
