@@ -20,7 +20,7 @@ ExecStart=\
     --volumes-from  "${redis_persistence_container}" \
     "${redis_image}"
 
-EnvironmentFile=/etc/docker-gitlab.pod.conf
+EnvironmentFile=/etc/systemd/system/env/docker-gitlab.env
 TimeoutStartSec=0
 Restart=always
 RestartSec=10

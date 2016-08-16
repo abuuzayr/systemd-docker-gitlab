@@ -38,7 +38,7 @@ ExecStart=\
     --link          "${redis_container}:redisio" \
     "${image}"
 
-EnvironmentFile=/etc/docker-gitlab.pod.conf
+EnvironmentFile=/etc/systemd/system/env/docker-gitlab.env
 TimeoutStartSec=0
 Restart=always
 RestartSec=10

@@ -1,26 +1,26 @@
 service_files := $(wildcard *.service *.timer)
-config_files := $(wildcard *.pod.conf)
+env_files := $(wildcard *.env)
 script_files := $(wildcard *.sh)
 
-install: install-config install-scripts install-service
-uninstall: uninstall-config uninstall-scripts uninstall-service
+install: install-env install-scripts install-service
+uninstall: uninstall-env uninstall-scripts uninstall-service
 
-install-config: $(config_files)
-	install -Zbm 0600 -t /etc $^
+install-env: $(env_files)
+	install -ZDm 0600 -t /etc/systemd/system/env $^
 
 install-scripts: $(script_files)
-	install -Zm 0644 -t /usr/local/bin $^
+	install -ZDm 0644 -t /etc/systemd/system/scripts $^
 
 install-service: $(service_files)
 	install -Zm 0644 -t /etc/systemd/system $^ && \
 	systemctl daemon-reload
 
-uninstall-config: $(config_files)
-	cd /etc && \
+uninstall-env: $(env_files)
+	cd /etc/systemd/system/env && \
 	rm -f $^
 
 uninstall-scripts: $(script_files)
-	cd /usr/local/bin && \
+	cd /etc/systemd/system/scripts && \
 	rm -f $^
 
 uninstall-service: $(service_files)
