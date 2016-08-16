@@ -1,5 +1,5 @@
 [Unit]
-Description=Docker Gitlab Redis Container
+Description=Docker Gitlab Redis Service
 Requires=\
   docker.service
 After=\

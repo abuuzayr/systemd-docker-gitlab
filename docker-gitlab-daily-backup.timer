@@ -1,5 +1,5 @@
 [Unit]
-Description=Docker Gitlab Daily Backup
+Description=Docker Gitlab Daily Backup Service
 
 [Timer]
 OnCalendar=*-*-* 02:00:00

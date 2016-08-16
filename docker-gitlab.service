@@ -1,5 +1,5 @@
 [Unit]
-Description=Docker Gitlab Container
+Description=Docker Gitlab Service
 Requires=\
   docker.service \
   docker-gitlab-postgresql.service \
