@@ -19,7 +19,8 @@ install-aws:
 		--name gitlab-aws \
 		--volumes-from gitlab-aws-credentials \
 		--entrypoint aws \
-		cgswong/aws configure
+		cgswong/aws configure && \
+	echo 'Remember to restart the service if it is up to ensure it attaches to the new container.'
 
 install-env: $(env_files)
 	install -ZDm 0600 -t /etc/systemd/system/env $^
