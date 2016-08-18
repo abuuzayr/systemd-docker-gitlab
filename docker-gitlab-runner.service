@@ -1,0 +1,36 @@
+[Unit]
+Description=Docker Gitlab Runner Service
+Requires=\
+  docker.service
+After=\
+  docker.service \
+  network.target
+
+[Service]
+ExecStartPre=-/usr/bin/docker stop "$runner_container"
+ExecStartPre=-/usr/bin/docker rm "$runner_container"
+ExecStartPre=/usr/bin/docker pull "$runner_image"
+ExecStartPre=\
+  -/usr/bin/docker create \
+      --name "$runner_config_container" \
+      --volume /etc/gitlab-runner \
+      --entrypoint /bin/true \
+      "$runner_image"
+ExecStartPre=\
+-/bin/bash -c 'mkdir -pZ /docker-volumes/${runner_container}/host'
+ExecStart=\
+  /usr/bin/docker run \
+    --name          "${runner_container}" \
+    --volume        "/docker-volumes/${runner_container}/host:/host:z" \
+    --volume        /var/run/docker.sock:/var/run/docker.sock \
+    --volumes-from  "${runner_config_container}" \
+    "$runner_image"
+
+EnvironmentFile=/etc/systemd/system/env/docker-gitlab.env
+TimeoutStartSec=0
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
+
